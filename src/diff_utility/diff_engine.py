@@ -6,6 +6,7 @@ and formatted output per CODING_STANDARDS.md.
 """
 
 import re
+from collections import Counter
 from dataclasses import dataclass
 
 
@@ -127,15 +128,11 @@ def compute_diff_changes(line1: str, line2: str) -> str:
     tokens1 = tokenize_line(norm1)
     tokens2 = tokenize_line(norm2)
 
-    # Simple token-based diff
-    # This is a simplified approach: we'll mark tokens in line2 that aren't in line1 as additions
-    # and tokens in line1 that aren't in line2 as deletions
+    # Use Counter to track token frequencies (excluding whitespace)
+    words1 = Counter(t for t in tokens1 if not t.isspace())
+    words2 = Counter(t for t in tokens2 if not t.isspace())
 
-    # Create sets for comparison (excluding whitespace for now)
-    words1 = {t for t in tokens1 if not t.isspace()}
-    words2 = {t for t in tokens2 if not t.isspace()}
-
-    # Find additions (in line2 but not in line1) and deletions (in line1 but not in line2)
+    # Find additions (more occurrences in line2) and deletions (more in line1)
     additions = words2 - words1
     deletions = words1 - words2
 
@@ -144,14 +141,17 @@ def compute_diff_changes(line1: str, line2: str) -> str:
     for token in tokens2:
         if token.isspace():
             result_parts.append(token)
-        elif token in additions:
+        elif additions.get(token, 0) > 0:
             result_parts.append(f"++ {token} ++")
+            # Decrease counter to handle multiple occurrences correctly
+            additions[token] -= 1
         else:
             result_parts.append(token)
 
     # Add deletions at the end
-    for deletion in deletions:
-        result_parts.append(f" -- {deletion} --")
+    for deletion, count in deletions.items():
+        for _ in range(count):
+            result_parts.append(f" -- {deletion} --")
 
     return "".join(result_parts)
 

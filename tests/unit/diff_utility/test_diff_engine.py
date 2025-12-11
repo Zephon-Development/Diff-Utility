@@ -4,7 +4,6 @@ Unit tests for diff_utility.diff_engine module.
 Tests demonstrate comprehensive coverage (≥80%) per CODING_STANDARDS.md §4.1.
 """
 
-
 from diff_utility.diff_engine import (
     DiffResult,
     are_lines_identical,
@@ -125,6 +124,18 @@ class TestComputeDiffChanges:
         result = compute_diff_changes("d. H", "d.  H")
         assert "++" not in result
         assert "--" not in result
+
+    def test_duplicate_tokens_handled_correctly(self) -> None:
+        """Test that duplicate tokens are handled correctly with frequency tracking."""
+        result = compute_diff_changes("hello hello world", "hello world")
+        assert "--" in result
+        assert "hello" in result
+        # Should show one hello as deletion
+
+    def test_multiple_additions_same_token(self) -> None:
+        """Test multiple additions of the same token."""
+        result = compute_diff_changes("hello world", "hello hello world")
+        assert "++" in result
 
 
 class TestCompareLines:

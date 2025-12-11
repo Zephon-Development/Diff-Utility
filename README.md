@@ -1,4 +1,4 @@
-# Python Template
+# Diff Utility
 
 **Version:** 0.1.0  
 **Python:** 3.11+  
@@ -8,9 +8,12 @@
 
 ## Overview
 
-This repository serves as a **standardized Python project template** for greenfield development. It enforces strict type safety, comprehensive test coverage (≥80%), and automated quality gates via CI/CD, in accordance with [`Documentation/CODING_STANDARDS.md`](Documentation/CODING_STANDARDS.md).
+A command-line tool for comparing two text files line by line with intelligent whitespace handling. The tool ignores differences in whitespace quantity while detecting new or missing whitespace boundaries, providing clear annotations of additions and deletions.
 
 **Key features:**
+- ✅ Intelligent whitespace normalization (ignores quantity, detects boundaries)
+- ✅ Custom diff output format with `++` addition and `--` deletion markers
+- ✅ Skips identical lines automatically
 - ✅ Strict type checking with mypy (no `Any` types)
 - ✅ Linting and formatting with Ruff + Black
 - ✅ Branch coverage enforcement (≥75%)
@@ -32,7 +35,7 @@ This repository serves as a **standardized Python project template** for greenfi
 ```powershell
 # Clone the repository
 git clone <repository-url>
-cd PythonTemplate
+cd Diff-Utility
 
 # Create virtual environment
 python -m venv .venv
@@ -45,14 +48,73 @@ pip install --upgrade pip
 pip install -e ".[dev]"
 ```
 
-### 3. Verify Installation
+### 3. Usage
+
+Compare two text files:
+
+```powershell
+# Basic usage
+diff-utility file1.txt file2.txt
+
+# Or using Python module
+python -m diff_utility.cli file1.txt file2.txt
+```
+
+**Output Format:**
+
+For each changed line, the tool outputs:
+```
+---
+[file 1 line]
+[file 2 line]
+
+[changes]
+```
+
+Where `[changes]` shows file2's content with:
+- `++text++` marking additions (text present in file2 but not file1)
+- `--text--` marking deletions (text present in file1 but not file2)
+
+**Example:**
+
+file1.txt:
+```
+Hello World.How are you
+```
+
+file2.txt:
+```
+Hello World. How are you
+```
+
+Output:
+```
+---
+Hello World.How are you
+Hello World. How are you
+
+Hello --World.How--++World.++++ ++How++ are you
+```
+
+### 4. Whitespace Handling
+
+The tool uses intelligent whitespace normalization:
+
+- **Ignores quantity differences:** `"Hello   World"` vs `"Hello World"` are considered equal
+- **Detects boundary changes:** `"Hello World.How"` vs `"Hello World. How"` shows the added space
+- **Preserves original output:** All diff annotations show the actual content from the files
+- **Normalizes for comparison only:** Tabs, spaces, and multiple whitespace characters are collapsed to single spaces when checking equality
+
+This allows the tool to focus on meaningful content changes while being flexible about formatting.
+
+### 5. Verify Installation
 
 ```powershell
 # Run all quality checks
-black --check .
-ruff check .
-mypy --strict .
-pytest --cov=src --cov-branch --cov-fail-under=80
+python -m black --check .
+python -m ruff check .
+python -m mypy --strict .
+python -m pytest --cov=src --cov-branch --cov-fail-under=80
 python scripts/check_branch_coverage.py --threshold 75
 ```
 
@@ -63,7 +125,7 @@ All checks should pass ✅ before you begin development.
 ## Project Structure
 
 ```
-PythonTemplate/
+Diff-Utility/
 ├── .github/
 │   ├── agents/              # AI agent configuration files
 │   └── workflows/
@@ -74,13 +136,14 @@ PythonTemplate/
 ├── scripts/
 │   └── check_branch_coverage.py  # Branch coverage enforcement
 ├── src/
-│   └── template/            # Main package (rename for your project)
-│       ├── __init__.py
+│   └── diff_utility/        # Main package
+│       ├── __init__.py      # Public API exports
 │       ├── py.typed         # PEP 561 type marker
-│       └── greeter.py       # Example module
+│       ├── diff.py          # Core diff engine
+│       └── cli.py           # Command-line interface
 ├── tests/
 │   └── unit/
-│       ├── template/        # Unit tests for src/template
+│       ├── diff_utility/    # Unit tests for src/diff_utility
 │       └── test_check_branch_coverage.py
 ├── pyproject.toml           # Project metadata & tool config
 ├── requirements.txt         # Locked runtime dependencies
@@ -96,16 +159,16 @@ PythonTemplate/
 
 ```powershell
 # Run all tests with coverage
-pytest
+python -m pytest
 
 # Run only unit tests
-pytest -m unit
+python -m pytest -m unit
 
 # Run with verbose output
-pytest -v
+python -m pytest -v
 
 # Generate HTML coverage report
-pytest --cov-report=html
+python -m pytest --cov-report=html
 # Open htmlcov/index.html in browser
 ```
 
@@ -113,16 +176,16 @@ pytest --cov-report=html
 
 ```powershell
 # Auto-format code
-black .
+python -m black .
 
 # Lint code
-ruff check .
+python -m ruff check .
 
 # Auto-fix safe lint issues
-ruff check --fix .
+python -m ruff check --fix .
 
 # Type check
-mypy --strict .
+python -m mypy --strict .
 ```
 
 ### Updating Dependencies
@@ -157,40 +220,6 @@ The GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every push and 
 
 **Runner Requirements:**  
 The workflow uses the **Grimslade** self-hosted runner (organization-level). This runner is maintained centrally and automatically available to all repositories in the organization. External users reusing this template outside the organization must replace `runs-on: [self-hosted, Grimslade]` with a GitHub-hosted runner (e.g., `ubuntu-latest`).
-
----
-
-## Customizing the Template
-
-### 1. Rename the Package
-
-1. Rename `src/template/` to `src/<your_package>/`
-2. Update `pyproject.toml`:
-   ```toml
-   [project]
-   name = "your-project-name"
-   description = "Your project description"
-   ```
-3. Update imports in tests to match new package name
-
-### 2. Add Application Logic
-
-- Place modules in `src/<your_package>/`
-- Mirror directory structure in `tests/unit/<your_package>/`
-- Follow patterns in `src/template/greeter.py` (type hints, docstrings)
-
-### 3. Configure Coverage Exceptions
-
-To exclude specific lines from coverage (use sparingly):
-
-```python
-# Add pragma comment
-def debug_only() -> None:
-    """This function is not covered in tests."""
-    ...  # pragma: no cover
-```
-
-See `pyproject.toml` `[tool.coverage.report]` for additional exclusion patterns.
 
 ---
 

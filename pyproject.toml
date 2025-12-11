@@ -1,11 +1,14 @@
 [project]
-name = "template"
+name = "diff-utility"
 version = "0.1.0"
-description = "Python project template with strict type safety and comprehensive testing"
+description = "A command-line tool for comparing two text files with custom whitespace handling"
 requires-python = ">=3.11"
 dependencies = [
     # Add runtime dependencies here
 ]
+
+[project.scripts]
+diff-utility = "diff_utility.cli:main"
 
 [project.optional-dependencies]
 dev = [

@@ -1,0 +1,56 @@
+name: Release Version
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number (e.g., 1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  build-and-release:
+    runs-on: [self-hosted, KHAZAD-DUM]  # Windows host for .exe
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+
+    - name: Run quality checks
+      run: |
+        python -m black --check .
+        python -m ruff check .
+        python -m mypy --strict .
+        python -m pytest --cov=src --cov-branch --cov-fail-under=80 -q
+        python scripts/check_branch_coverage.py --threshold 75
+
+    - name: Update version
+      run: echo "${{ inputs.version }}" > VERSION.txt
+
+    - name: Build executable
+      run: python build_exe.py
+
+    - name: Create version release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: version-${{ inputs.version }}
+        name: Version ${{ inputs.version }}
+        body: |
+          Release for Diff-Utility v${{ inputs.version }}
+
+          This is a tagged version release containing the executable.
+        draft: false
+        prerelease: false
+        files: ./dist/diff-utility.exe
+        fail_on_unmatched_files: true
+        generate_release_notes: true

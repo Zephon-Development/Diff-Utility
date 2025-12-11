@@ -73,17 +73,17 @@ jobs:
           "$VENV_PATH/python" -m pip install --no-deps -e ".[dev]"
 
       - name: Format check (black)
-        run: black --check .
+        run: "$VENV_PATH/python" -m black --check .
 
       - name: Lint (ruff)
-        run: ruff check .
+        run: "$VENV_PATH/python" -m ruff check .
 
       - name: Type check (mypy)
-        run: mypy --strict .
+        run: "$VENV_PATH/python" -m mypy --strict .
 
       - name: Tests with coverage
         run: |
-          python -m pytest \
+          "$VENV_PATH/python" -m pytest \
             --cov=src \
             --cov-branch \
             --cov-report=term-missing:skip-covered \
@@ -93,7 +93,7 @@ jobs:
             --cov-fail-under=80
 
       - name: Enforce branch coverage
-        run: python scripts/check_branch_coverage.py --threshold 75
+        run: "$VENV_PATH/python" scripts/check_branch_coverage.py --threshold 75
 
       - name: Upload coverage HTML
         if: always()

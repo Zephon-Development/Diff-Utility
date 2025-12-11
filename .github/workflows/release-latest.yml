@@ -10,6 +10,10 @@ jobs:
     runs-on: [self-hosted, KHAZAD-DUM]  # Windows host for .exe
 
     steps:
+    - name: Allow PowerShell scripts
+      shell: pwsh
+      run: Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
+
     - name: Checkout code
       uses: actions/checkout@v4
 

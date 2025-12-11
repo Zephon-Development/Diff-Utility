@@ -1,11 +1,5 @@
 name: CI
 
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
 jobs:
   lint-type-test:
     # Self-hosted runner requirement: ensure a runner labeled "Grimslade" is online and maintained
@@ -84,6 +78,25 @@ jobs:
       - name: Tests with coverage
         run: |
           "$VENV_PATH/python" -m pytest \
+      - name: Type check (mypy)
+        run: "$VENV_PATH/python" -m mypy --strict .
+=======
+        shell: pwsh
+        run: python -m black --check .
+
+      - name: Lint (ruff)
+        shell: pwsh
+        run: python -m ruff check .
+        run: "$VENV_PATH/python" scripts/check_branch_coverage.py --threshold 75
+      - name: Type check (mypy)
+        shell: pwsh
+        run: python -m mypy --strict .
+>>>>>>> e1ac3dfeca4eaed5604418a21338982c93b7a50e
+
+      - name: Tests with coverage
+        shell: pwsh
+        run: |
+          "$VENV_PATH/python" -m pytest \
             --cov=src \
             --cov-branch \
             --cov-report=term-missing:skip-covered \
@@ -93,7 +106,12 @@ jobs:
             --cov-fail-under=80
 
       - name: Enforce branch coverage
+<<<<<<< HEAD
         run: "$VENV_PATH/python" scripts/check_branch_coverage.py --threshold 75
+=======
+        shell: pwsh
+        run: python scripts/check_branch_coverage.py --threshold 75
+>>>>>>> e1ac3dfeca4eaed5604418a21338982c93b7a50e
 
       - name: Upload coverage HTML
         if: always()

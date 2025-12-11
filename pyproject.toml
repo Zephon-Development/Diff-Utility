@@ -1,11 +1,14 @@
 [project]
-name = "template"
+name = "diff-utility"
 version = "0.1.0"
-description = "Python project template with strict type safety and comprehensive testing"
+description = "CLI tool for comparing text files line by line with custom diff output"
 requires-python = ">=3.11"
 dependencies = [
     # Add runtime dependencies here
 ]
+
+[project.scripts]
+diff-utility = "diff_utility.cli:main"
 
 [project.optional-dependencies]
 dev = [

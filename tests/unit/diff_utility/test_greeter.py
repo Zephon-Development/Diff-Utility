@@ -1,12 +1,12 @@
 """
-Unit tests for template.greeter module.
+Unit tests for diff_utility.greeter module.
 
 Tests demonstrate comprehensive coverage (≥80%) per CODING_STANDARDS.md §4.1.
 """
 
 import pytest
 
-from template.greeter import greeter
+from diff_utility.greeter import greeter
 
 
 def test_greeter_informal_default() -> None:

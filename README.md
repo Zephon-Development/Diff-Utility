@@ -1,4 +1,4 @@
-# Python Template
+# Diff Utility
 
 **Version:** 0.1.0  
 **Python:** 3.11+  
@@ -8,9 +8,12 @@
 
 ## Overview
 
-This repository serves as a **standardized Python project template** for greenfield development. It enforces strict type safety, comprehensive test coverage (≥80%), and automated quality gates via CI/CD, in accordance with [`Documentation/CODING_STANDARDS.md`](Documentation/CODING_STANDARDS.md).
+A CLI tool for comparing text files line by line with custom diff output. The utility implements whitespace-aware comparison and provides formatted output showing additions and deletions.
 
 **Key features:**
+- ✅ Whitespace Handling: Ignores whitespace quantity but detects new whitespace
+- ✅ Identical Line Skipping: Only shows lines that differ
+- ✅ Custom Diff Output: Formatted with `++ ++` for additions and `-- --` for deletions
 - ✅ Strict type checking with mypy (no `Any` types)
 - ✅ Linting and formatting with Ruff + Black
 - ✅ Branch coverage enforcement (≥75%)
@@ -32,7 +35,7 @@ This repository serves as a **standardized Python project template** for greenfi
 ```powershell
 # Clone the repository
 git clone <repository-url>
-cd PythonTemplate
+cd Diff-Utility
 
 # Create virtual environment
 python -m venv .venv
@@ -45,7 +48,37 @@ pip install --upgrade pip
 pip install -e ".[dev]"
 ```
 
-### 3. Verify Installation
+### 3. Usage
+
+Compare two text files:
+
+```powershell
+diff-utility file1.txt file2.txt
+```
+
+The tool will output differences in the format:
+
+```
+---
+[file 1 line]
+[file 2 line]
+
+[changes]
+```
+
+Where `[changes]` shows the file 2 line with `++ ++` surrounding additions and `-- --` surrounding deletions from file 1.
+
+**Examples:**
+
+```powershell
+# Compare two files with whitespace differences
+diff-utility original.txt modified.txt
+
+# Identical files (no output except "Files are identical.")
+diff-utility file1.txt file1.txt
+```
+
+### 4. Verify Installation
 
 ```powershell
 # Run all quality checks
@@ -60,10 +93,37 @@ All checks should pass ✅ before you begin development.
 
 ---
 
+## Features
+
+### Whitespace Handling
+
+The diff utility uses intelligent whitespace handling:
+
+- **Ignores whitespace quantity**: `"d. H"` and `"d.  H"` are considered identical
+- **Detects new whitespace**: `"d.H"` and `"d. H"` are different
+
+This is achieved by normalizing consecutive whitespace characters to single spaces while preserving the presence/absence of whitespace.
+
+### Custom Diff Output
+
+For each changed line, the output shows:
+1. `---` separator
+2. Original line from file 1
+3. Modified line from file 2
+4. Empty line
+5. Changes line with markers:
+   - `++ text ++` for additions (present in file 2 but not in file 1)
+   - `-- text --` for deletions (present in file 1 but not in file 2)
+6. Empty line
+
+Identical lines are skipped from the output.
+
+---
+
 ## Project Structure
 
 ```
-PythonTemplate/
+Diff-Utility/
 ├── .github/
 │   ├── agents/              # AI agent configuration files
 │   └── workflows/
@@ -74,13 +134,15 @@ PythonTemplate/
 ├── scripts/
 │   └── check_branch_coverage.py  # Branch coverage enforcement
 ├── src/
-│   └── template/            # Main package (rename for your project)
+│   └── diff_utility/        # Main package
 │       ├── __init__.py
 │       ├── py.typed         # PEP 561 type marker
-│       └── greeter.py       # Example module
+│       ├── diff_engine.py   # Core diff comparison logic
+│       ├── cli.py           # Command-line interface
+│       └── greeter.py       # Example module (can be removed)
 ├── tests/
 │   └── unit/
-│       ├── template/        # Unit tests for src/template
+│       ├── diff_utility/    # Unit tests for src/diff_utility
 │       └── test_check_branch_coverage.py
 ├── pyproject.toml           # Project metadata & tool config
 ├── requirements.txt         # Locked runtime dependencies

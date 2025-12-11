@@ -66,6 +66,12 @@ def lines_equal_norm(a: str, b: str) -> bool:
     return normalize_line(a) == normalize_line(b)
 
 
+def _format_file_line(label: str, content: str) -> str:
+    """Return a diff output line prefixed with the file label."""
+
+    return f"{label}: {content}" if content else f"{label}: "
+
+
 def _tokenize(line: str) -> list[str]:
     """Split a line into tokens, keeping whitespace sequences as separate tokens.
 
@@ -135,8 +141,8 @@ def annotate_changes(line1: str, line2: str) -> str:
 def diff_lines(lines1: list[str], lines2: list[str]) -> list[str]:
     """Generate diff output blocks for changed lines.
 
-    Compares lines from two files and yields formatted blocks for lines that differ.
-    Identical lines (after normalization) are skipped.
+    Uses SequenceMatcher to detect line insertions, deletions, and replacements.
+    This prevents cascading false positives when lines are inserted or deleted.
 
     Args:
         lines1: Lines from file 1.
@@ -153,23 +159,72 @@ def diff_lines(lines1: list[str], lines2: list[str]) -> list[str]:
         [changes]
     """
     output: list[str] = []
-    max_lines = max(len(lines1), len(lines2))
 
-    for i in range(max_lines):
-        line1 = lines1[i] if i < len(lines1) else ""
-        line2 = lines2[i] if i < len(lines2) else ""
+    # Use SequenceMatcher with normalized line comparison
+    matcher = SequenceMatcher(None, lines1, lines2, autojunk=False)
+    matcher.set_seq1([normalize_line(line) for line in lines1])
+    matcher.set_seq2([normalize_line(line) for line in lines2])
 
-        # Skip if lines are equal after normalization
-        if lines_equal_norm(line1, line2):
+    for opcode, i1, i2, j1, j2 in matcher.get_opcodes():
+        if opcode == "equal":
+            # Lines are identical after normalization, skip
             continue
+        if opcode == "insert":
+            # Lines only in file2 (insertions)
+            for j in range(j1, j2):
+                line2 = lines2[j]
+                output.append("---")
+                output.append(_format_file_line("File A", ""))
+                output.append(_format_file_line("File B", line2))
+                output.append("")
+                # Mark entire line as insertion
+                output.append(f"++{line2}++")
+                output.append("")
+        elif opcode == "delete":
+            # Lines only in file1 (deletions)
+            for i in range(i1, i2):
+                line1 = lines1[i]
+                output.append("---")
+                output.append(_format_file_line("File A", line1))
+                output.append(_format_file_line("File B", ""))
+                output.append("")
+                # Mark entire line as deletion
+                output.append(f"--{line1}--")
+                output.append("")
+        elif opcode == "replace":
+            # Lines differ between files
+            # Process each pair and use token-level annotation
+            for i, j in zip(range(i1, i2), range(j1, j2), strict=False):
+                line1 = lines1[i]
+                line2 = lines2[j]
+                output.append("---")
+                output.append(_format_file_line("File A", line1))
+                output.append(_format_file_line("File B", line2))
+                output.append("")
+                output.append(annotate_changes(line1, line2))
+                output.append("")
 
-        # Emit diff block for changed line
-        output.append("---")
-        output.append(line1)
-        output.append(line2)
-        output.append("")
-        output.append(annotate_changes(line1, line2))
-        output.append("")
+            # Handle unequal replace ranges (different number of lines)
+            if (i2 - i1) > (j2 - j1):
+                # More deletions than insertions
+                for i in range(i1 + (j2 - j1), i2):
+                    line1 = lines1[i]
+                    output.append("---")
+                    output.append(_format_file_line("File A", line1))
+                    output.append(_format_file_line("File B", ""))
+                    output.append("")
+                    output.append(f"--{line1}--")
+                    output.append("")
+            elif (j2 - j1) > (i2 - i1):
+                # More insertions than deletions
+                for j in range(j1 + (i2 - i1), j2):
+                    line2 = lines2[j]
+                    output.append("---")
+                    output.append(_format_file_line("File A", ""))
+                    output.append(_format_file_line("File B", line2))
+                    output.append("")
+                    output.append(f"++{line2}++")
+                    output.append("")
 
     return output
 

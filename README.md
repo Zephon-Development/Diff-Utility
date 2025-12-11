@@ -1,6 +1,6 @@
 # Diff Utility
 
-**Version:** 1.0.0  
+**Version:** 1.1.0  
 **Python:** 3.11+  
 **License:** GPL-3.0-or-later
 
@@ -11,6 +11,7 @@
 A command-line tool for comparing two text files line by line with intelligent whitespace handling. The tool ignores differences in whitespace quantity while detecting new or missing whitespace boundaries, providing clear annotations of additions and deletions.
 
 **Key features:**
+- ✅ Smart line insertion/deletion detection (no cascading false positives)
 - ✅ Intelligent whitespace normalization (ignores quantity, detects boundaries)
 - ✅ Custom diff output format with `++` addition and `--` deletion markers
 - ✅ Skips identical lines automatically
@@ -90,11 +91,41 @@ Hello World. How are you
 Output:
 ```
 ---
-Hello World.How are you
-Hello World. How are you
+File A: Hello World.How are you
+File B: Hello World. How are you
 
 Hello --World.How--++World.++++ ++How++ are you
 ```
+
+**Line Insertion/Deletion Detection:**
+
+The diff engine uses sequence matching to detect when entire lines are inserted or deleted, preventing false positives for subsequent lines.
+
+file1.txt:
+```
+Line 1
+Line 3
+Line 4
+```
+
+file2.txt:
+```
+Line 1
+Line 2
+Line 3
+Line 4
+```
+
+Output:
+```
+---
+File A: 
+File B: Line 2
+
++Line 2++
+```
+
+Notice that Lines 3 and 4 are **not** flagged as different - only the actual inserted line is shown. This ensures accurate diffs even for large files with scattered changes.
 
 ### 4. Whitespace Handling
 
@@ -257,7 +288,7 @@ If a library lacks type stubs, create a `py.typed` marker in a local stub packag
 
 ## License & Support
 
-**Internal use only** – This template is maintained for organization projects. For questions, contact the platform engineering team or refer to the CODING_STANDARDS.md Lint Allowlist table (§3.4) for policy exceptions.
+**License:** GPL-3.0-or-later  
 
 ---
 

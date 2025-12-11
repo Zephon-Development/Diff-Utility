@@ -166,8 +166,8 @@ class TestDiffLines:
         result = diff_lines(lines1, lines2)
 
         assert result[0] == "---"
-        assert result[1] == "Hello World"
-        assert result[2] == "Hello Universe"
+        assert result[1] == "File A: Hello World"
+        assert result[2] == "File B: Hello Universe"
         assert result[3] == ""
         assert "--World--" in result[4]
         assert "++Universe++" in result[4]
@@ -183,14 +183,218 @@ class TestDiffLines:
         assert result.count("---") == 2
 
     @pytest.mark.unit
+    def test_insert_only_single_line(self) -> None:
+        """Test that a single inserted line is detected correctly."""
+        lines1 = ["Line 1", "Line 3"]
+        lines2 = ["Line 1", "Line 2", "Line 3"]
+        result = diff_lines(lines1, lines2)
+
+        # Should have one block for the insertion
+        assert result.count("---") == 1
+        # Inserted line should be marked with ++
+        assert any("++Line 2++" in line for line in result)
+
+    @pytest.mark.unit
+    def test_delete_only_single_line(self) -> None:
+        """Test that a single deleted line is detected correctly."""
+        lines1 = ["Line 1", "Line 2", "Line 3"]
+        lines2 = ["Line 1", "Line 3"]
+        result = diff_lines(lines1, lines2)
+
+        # Should have one block for the deletion
+        assert result.count("---") == 1
+        # Deleted line should be marked with --
+        assert any("--Line 2--" in line for line in result)
+
+    @pytest.mark.unit
+    def test_insert_and_delete_different_positions(self) -> None:
+        """Test insert and delete at different positions in the file."""
+        lines1 = ["Line 1", "Line 2", "Line 4"]
+        lines2 = ["Line 1", "Line 3", "Line 4"]
+        result = diff_lines(lines1, lines2)
+
+        # Should have one block showing the replacement
+        assert result.count("---") == 1
+        assert any("Line 2" in line for line in result)
+        assert any("Line 3" in line for line in result)
+
+    @pytest.mark.unit
+    def test_multiple_consecutive_insertions(self) -> None:
+        """Test multiple consecutive line insertions."""
+        lines1 = ["Line 1", "Line 5"]
+        lines2 = ["Line 1", "Line 2", "Line 3", "Line 4", "Line 5"]
+        result = diff_lines(lines1, lines2)
+
+        # Should have three blocks for the three insertions
+        assert result.count("---") == 3
+        assert any("++Line 2++" in line for line in result)
+        assert any("++Line 3++" in line for line in result)
+        assert any("++Line 4++" in line for line in result)
+
+    @pytest.mark.unit
+    def test_multiple_consecutive_deletions(self) -> None:
+        """Test multiple consecutive line deletions."""
+        lines1 = ["Line 1", "Line 2", "Line 3", "Line 4", "Line 5"]
+        lines2 = ["Line 1", "Line 5"]
+        result = diff_lines(lines1, lines2)
+
+        # Should have three blocks for the three deletions
+        assert result.count("---") == 3
+        assert any("--Line 2--" in line for line in result)
+        assert any("--Line 3--" in line for line in result)
+        assert any("--Line 4--" in line for line in result)
+
+    @pytest.mark.unit
+    def test_insert_at_beginning(self) -> None:
+        """Test line insertion at the beginning of file."""
+        lines1 = ["Line 2", "Line 3"]
+        lines2 = ["Line 1", "Line 2", "Line 3"]
+        result = diff_lines(lines1, lines2)
+
+        assert result.count("---") == 1
+        assert any("++Line 1++" in line for line in result)
+
+    @pytest.mark.unit
+    def test_insert_at_end(self) -> None:
+        """Test line insertion at the end of file."""
+        lines1 = ["Line 1", "Line 2"]
+        lines2 = ["Line 1", "Line 2", "Line 3"]
+        result = diff_lines(lines1, lines2)
+
+        assert result.count("---") == 1
+        assert any("++Line 3++" in line for line in result)
+
+    @pytest.mark.unit
+    def test_delete_at_beginning(self) -> None:
+        """Test line deletion at the beginning of file."""
+        lines1 = ["Line 1", "Line 2", "Line 3"]
+        lines2 = ["Line 2", "Line 3"]
+        result = diff_lines(lines1, lines2)
+
+        assert result.count("---") == 1
+        assert any("--Line 1--" in line for line in result)
+
+    @pytest.mark.unit
+    def test_delete_at_end(self) -> None:
+        """Test line deletion at the end of file."""
+        lines1 = ["Line 1", "Line 2", "Line 3"]
+        lines2 = ["Line 1", "Line 2"]
+        result = diff_lines(lines1, lines2)
+
+        assert result.count("---") == 1
+        assert any("--Line 3--" in line for line in result)
+
+    @pytest.mark.unit
+    def test_no_cascading_false_positives(self) -> None:
+        """Test that inserting a line doesn't flag subsequent lines as different."""
+        lines1 = ["Line 1", "Line 3", "Line 4", "Line 5"]
+        lines2 = ["Line 1", "Line 2", "Line 3", "Line 4", "Line 5"]
+        result = diff_lines(lines1, lines2)
+
+        # Should only have one block for the insertion
+        assert result.count("---") == 1
+        assert any("++Line 2++" in line for line in result)
+        # Lines 3, 4, 5 should NOT appear in the diff
+        assert result.count("Line 3") <= 1  # Only in the insertion context if at all
+        assert "Line 4" not in "\n".join(result) or result.count("Line 4") == 0
+        assert "Line 5" not in "\n".join(result) or result.count("Line 5") == 0
+
+    @pytest.mark.unit
+    def test_replace_with_token_level_annotation(self) -> None:
+        """Test that line replacements use token-level annotation."""
+        lines1 = ["Hello World"]
+        lines2 = ["Hello Universe"]
+        result = diff_lines(lines1, lines2)
+
+        # Should show token-level changes
+        assert "--World--" in "\n".join(result)
+        assert "++Universe++" in "\n".join(result)
+
+    @pytest.mark.unit
     def test_different_length_files(self) -> None:
         """Test files with different lengths."""
         lines1 = ["Line 1"]
         lines2 = ["Line 1", "Line 2"]
         result = diff_lines(lines1, lines2)
 
-        # Second line is "" vs "Line 2", should produce a block
+        # Second line is an insertion
         assert "---" in result
+        assert any("++Line 2++" in line for line in result)
+
+    @pytest.mark.unit
+    def test_large_file_performance(self) -> None:
+        """Test performance with large files (regression test)."""
+        # Create synthetic 1000-line files with one insertion
+        lines1 = [f"Line {i}" for i in range(1000)]
+        lines2 = (
+            [f"Line {i}" for i in range(500)]
+            + ["Inserted Line"]
+            + [f"Line {i}" for i in range(500, 1000)]
+        )
+
+        result = diff_lines(lines1, lines2)
+
+        # Should only report the one insertion, not flag remaining 500 lines
+        assert result.count("---") == 1
+        assert any("++Inserted Line++" in line for line in result)
+
+    @pytest.mark.unit
+    def test_empty_file_comparison(self) -> None:
+        """Test comparing empty files."""
+        lines1: list[str] = []
+        lines2: list[str] = []
+        result = diff_lines(lines1, lines2)
+        assert result == []
+
+    @pytest.mark.unit
+    def test_empty_vs_non_empty(self) -> None:
+        """Test comparing empty file with non-empty file."""
+        lines1: list[str] = []
+        lines2 = ["Line 1", "Line 2"]
+        result = diff_lines(lines1, lines2)
+
+        # Both lines should be marked as insertions
+        assert result.count("---") == 2
+        assert any("++Line 1++" in line for line in result)
+        assert any("++Line 2++" in line for line in result)
+
+    @pytest.mark.unit
+    def test_non_empty_vs_empty(self) -> None:
+        """Test comparing non-empty file with empty file."""
+        lines1 = ["Line 1", "Line 2"]
+        lines2: list[str] = []
+        result = diff_lines(lines1, lines2)
+
+        # Both lines should be marked as deletions
+        assert result.count("---") == 2
+        assert any("--Line 1--" in line for line in result)
+        assert any("--Line 2--" in line for line in result)
+
+    @pytest.mark.unit
+    def test_replace_unequal_more_deletions(self) -> None:
+        """Test replace operation where source has more lines than destination."""
+        lines1 = ["Old Line 1", "Old Line 2", "Old Line 3"]
+        lines2 = ["New Line 1"]
+        result = diff_lines(lines1, lines2)
+
+        # Should have blocks for the replacement and deletions
+        assert result.count("---") == 3
+        assert any("New Line 1" in line for line in result)
+        assert any("--Old Line 2--" in line for line in result)
+        assert any("--Old Line 3--" in line for line in result)
+
+    @pytest.mark.unit
+    def test_replace_unequal_more_insertions(self) -> None:
+        """Test replace operation where destination has more lines than source."""
+        lines1 = ["Old Line 1"]
+        lines2 = ["New Line 1", "New Line 2", "New Line 3"]
+        result = diff_lines(lines1, lines2)
+
+        # Should have blocks for the replacement and insertions
+        assert result.count("---") == 3
+        assert any("Old Line 1" in line for line in result)
+        assert any("++New Line 2++" in line for line in result)
+        assert any("++New Line 3++" in line for line in result)
 
 
 class TestReadLines:

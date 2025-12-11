@@ -1,5 +1,11 @@
 name: CI
 
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
 jobs:
   lint-type-test:
     # Self-hosted runner requirement: ensure a runner labeled "Grimslade" is online and maintained
@@ -38,101 +44,123 @@ jobs:
             echo "VENV_PATH=$PWD/$VENV_DIR/bin" >> $GITHUB_ENV
           elif [ -f "$VENV_DIR/Scripts/activate" ]; then
             echo "VENV_PATH=$PWD/$VENV_DIR/Scripts" >> $GITHUB_ENV
-          else
-            echo "Virtualenv not found" >&2
-            exit 1
-          fi
-          echo "$VENV_PATH" >> $GITHUB_PATH
+          name: CI
 
-      - name: Cache tool caches (mypy/ruff/pytest)
-        uses: actions/cache@v4
-        with:
-          path: |
-            .mypy_cache
-            .ruff_cache
-            .pytest_cache
-          key: tool-caches-${{ runner.os }}-${{ hashFiles('pyproject.toml') }}
-          restore-keys: |
-            tool-caches-${{ runner.os }}-
+          on:
+            push:
+              branches: [main]
+            pull_request:
+              branches: [main]
 
-      - name: Install dependencies
-        if: steps.venv-cache.outputs.cache-hit != 'true'
-        run: |
-          "$VENV_PATH/python" -m pip install --upgrade pip
-          "$VENV_PATH/python" -m pip install -e ".[dev]"
+          jobs:
+            lint-type-test:
+              # Self-hosted runner requirement: ensure a runner labeled "Grimslade" is online and maintained
+              # If not available, replace with a GitHub-hosted runner label (e.g., ubuntu-latest)
+              runs-on: [self-hosted, Grimslade]
+              env:
+                VENV_DIR: .venv
+              steps:
+                - name: Checkout
+                  uses: actions/checkout@v4
 
-      - name: Refresh entry points on cache hit
-        if: steps.venv-cache.outputs.cache-hit == 'true'
-        run: |
-          "$VENV_PATH/python" -m pip install --no-deps -e ".[dev]"
+                - name: Set up Python
+                  uses: actions/setup-python@v5
+                  id: python-setup
+                  with:
+                    python-version: "3.11"
+                    cache: "pip"
 
-      - name: Format check (black)
-        run: "$VENV_PATH/python" -m black --check .
+                - name: Cache virtualenv
+                  id: venv-cache
+                  uses: actions/cache@v4
+                  with:
+                    path: .venv
+                    key: venv-${{ runner.os }}-${{ steps.python-setup.outputs.python-version || '3.11' }}-${{ hashFiles('pyproject.toml') }}
+                    restore-keys: |
+                      venv-${{ runner.os }}-${{ steps.python-setup.outputs.python-version || '3.11' }}-
+                      venv-${{ runner.os }}-
 
-      - name: Lint (ruff)
-        run: "$VENV_PATH/python" -m ruff check .
+                - name: Ensure virtualenv exists
+                  if: steps.venv-cache.outputs.cache-hit != 'true'
+                  run: python -m venv "$VENV_DIR"
 
-      - name: Type check (mypy)
-        run: "$VENV_PATH/python" -m mypy --strict .
+                - name: Activate virtualenv path
+                  run: |
+                    if [ -f "$VENV_DIR/bin/activate" ]; then
+                      echo "VENV_PATH=$PWD/$VENV_DIR/bin" >> $GITHUB_ENV
+                    elif [ -f "$VENV_DIR/Scripts/activate" ]; then
+                      echo "VENV_PATH=$PWD/$VENV_DIR/Scripts" >> $GITHUB_ENV
+                    else
+                      echo "Virtualenv not found" >&2
+                      exit 1
+                    fi
+                    echo "$VENV_PATH" >> $GITHUB_PATH
 
-      - name: Tests with coverage
-        run: |
-          "$VENV_PATH/python" -m pytest \
-      - name: Type check (mypy)
-        run: "$VENV_PATH/python" -m mypy --strict .
-=======
-        shell: pwsh
-        run: python -m black --check .
+                - name: Cache tool caches (mypy/ruff/pytest)
+                  uses: actions/cache@v4
+                  with:
+                    path: |
+                      .mypy_cache
+                      .ruff_cache
+                      .pytest_cache
+                    key: tool-caches-${{ runner.os }}-${{ hashFiles('pyproject.toml') }}
+                    restore-keys: |
+                      tool-caches-${{ runner.os }}-
 
-      - name: Lint (ruff)
-        shell: pwsh
-        run: python -m ruff check .
-        run: "$VENV_PATH/python" scripts/check_branch_coverage.py --threshold 75
-      - name: Type check (mypy)
-        shell: pwsh
-        run: python -m mypy --strict .
->>>>>>> e1ac3dfeca4eaed5604418a21338982c93b7a50e
+                - name: Install dependencies
+                  if: steps.venv-cache.outputs.cache-hit != 'true'
+                  run: |
+                    "$VENV_PATH/python" -m pip install --upgrade pip
+                    "$VENV_PATH/python" -m pip install -e ".[dev]"
 
-      - name: Tests with coverage
-        shell: pwsh
-        run: |
-          "$VENV_PATH/python" -m pytest \
-            --cov=src \
-            --cov-branch \
-            --cov-report=term-missing:skip-covered \
-            --cov-report=xml \
-            --cov-report=html \
-            --cov-report=json \
-            --cov-fail-under=80
+                - name: Refresh entry points on cache hit
+                  if: steps.venv-cache.outputs.cache-hit == 'true'
+                  run: |
+                    "$VENV_PATH/python" -m pip install --no-deps -e ".[dev]"
 
-      - name: Enforce branch coverage
-<<<<<<< HEAD
-        run: "$VENV_PATH/python" scripts/check_branch_coverage.py --threshold 75
-=======
-        shell: pwsh
-        run: python scripts/check_branch_coverage.py --threshold 75
->>>>>>> e1ac3dfeca4eaed5604418a21338982c93b7a50e
+                - name: Format check (black)
+                  run: "$VENV_PATH/python" -m black --check .
 
-      - name: Upload coverage HTML
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-html
-          path: htmlcov
-          if-no-files-found: ignore
+                - name: Lint (ruff)
+                  run: "$VENV_PATH/python" -m ruff check .
 
-      - name: Upload coverage XML
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-xml
-          path: coverage.xml
-          if-no-files-found: ignore
+                - name: Type check (mypy)
+                  run: "$VENV_PATH/python" -m mypy --strict .
 
-      - name: Upload coverage JSON
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-json
-          path: coverage.json
-          if-no-files-found: ignore
+                - name: Tests with coverage
+                  run: |
+                    "$VENV_PATH/python" -m pytest \
+                      --cov=src \
+                      --cov-branch \
+                      --cov-report=term-missing:skip-covered \
+                      --cov-report=xml \
+                      --cov-report=html \
+                      --cov-report=json \
+                      --cov-fail-under=80
+
+                - name: Enforce branch coverage
+                  run: "$VENV_PATH/python" scripts/check_branch_coverage.py --threshold 75
+
+                - name: Upload coverage HTML
+                  if: always()
+                  uses: actions/upload-artifact@v4
+                  with:
+                    name: coverage-html
+                    path: htmlcov
+                    if-no-files-found: ignore
+
+                - name: Upload coverage XML
+                  if: always()
+                  uses: actions/upload-artifact@v4
+                  with:
+                    name: coverage-xml
+                    path: coverage.xml
+                    if-no-files-found: ignore
+
+                - name: Upload coverage JSON
+                  if: always()
+                  uses: actions/upload-artifact@v4
+                  with:
+                    name: coverage-json
+                    path: coverage.json
+                    if-no-files-found: ignore

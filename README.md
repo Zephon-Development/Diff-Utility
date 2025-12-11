@@ -1,8 +1,8 @@
 # Diff Utility
 
-**Version:** 0.1.0  
+**Version:** 1.0.0  
 **Python:** 3.11+  
-**License:** Internal use only
+**License:** GPL-3.0-or-later
 
 ---
 

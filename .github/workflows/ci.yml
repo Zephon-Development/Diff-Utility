@@ -115,7 +115,7 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           VERSION=$(cat VERSION.txt)
-          if ! git tag -l | grep -q "v$VERSION"; then
+          if ! git ls-remote --tags origin | grep -q "refs/tags/v$VERSION"; then
             git tag "v$VERSION"
             git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}
             git push origin "v$VERSION"

@@ -15,9 +15,10 @@ def main() -> int:  # noqa: PLR0911
     Returns:
         Exit code: 0 on success, 1 on I/O error, 2 on argument error.
     """
-    # Handle special help cases before argparse
-    if len(sys.argv) > 1 and sys.argv[1] in ("/?", "--?"):
-        sys.argv[1] = "--help"
+    # Convert special help cases to standard --help
+    argv = sys.argv.copy()
+    if len(argv) > 1 and argv[1] in ("/?", "--?"):
+        argv[1] = "--help"
 
     parser = argparse.ArgumentParser(
         prog="diff-utility",
@@ -67,12 +68,12 @@ def main() -> int:  # noqa: PLR0911
         help="Path to the output file (named, overrides positional)",
     )
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv[1:])
 
     # Named arguments override positional ones
-    final_file1 = args.named_file1 if args.named_file1 is not None else args.file1
-    final_file2 = args.named_file2 if args.named_file2 is not None else args.file2
-    final_output = args.named_output if args.named_output is not None else args.output
+    final_file1 = args.named_file1 or args.file1
+    final_file2 = args.named_file2 or args.file2
+    final_output = args.named_output or args.output
 
     # Validate required arguments
     if final_file1 is None:

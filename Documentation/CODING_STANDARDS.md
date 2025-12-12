@@ -705,6 +705,28 @@ user_id = request.get("user_id")
 - Archive completed plans within 1 week of feature ship
 - Update Reference docs with each major release
 
+### 5.5 Version Management
+
+**Version Bump Checklist:**
+
+When bumping the project version, the following files **must** be updated consistently:
+
+1. **`pyproject.toml`** – Update the `version` field in the `[project]` section
+2. **`VERSION.txt`** – Update the version number (single line)
+3. **`README.md`** – Update the version badge/reference in the header
+4. **`RELEASE_NOTES.md`** – Add a new version section with changes
+
+**Version Format:** Follow [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH`
+- **MAJOR**: Breaking changes
+- **MINOR**: New features (backward compatible)
+- **PATCH**: Bug fixes (backward compatible)
+
+**Process:**
+1. Update all four files in the same commit
+2. Use commit message format: "Bump version to X.Y.Z"
+3. Tag the commit with `vX.Y.Z` after merge to main
+4. Update RELEASE_NOTES.md with detailed changelog before version bump
+
 ---
 
 ## 6. Error Handling and Logging Standards

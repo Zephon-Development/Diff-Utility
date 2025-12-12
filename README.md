@@ -1,6 +1,6 @@
 # Diff Utility
 
-**Version:** 1.1.0  
+**Version:** 1.1.1
 **Python:** 3.11+  
 **License:** GPL-3.0-or-later
 
@@ -13,6 +13,7 @@ A command-line tool for comparing two text files line by line with intelligent w
 **Key features:**
 - ✅ Smart line insertion/deletion detection (no cascading false positives)
 - ✅ Intelligent whitespace normalization (ignores quantity, detects boundaries)
+- ✅ Supports UTF-8, cp1252 and latin-1 encoding
 - ✅ Custom diff output format with `++` addition and `--` deletion markers
 - ✅ Skips identical lines automatically
 - ✅ Strict type checking with mypy (no `Any` types)

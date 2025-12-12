@@ -435,6 +435,28 @@ class TestReadLines:
         with pytest.raises(FileNotFoundError):
             read_lines(non_existent)
 
+    @pytest.mark.unit
+    def test_encoding_fallback_cp1252(self, tmp_path: Path) -> None:
+        """Test that files with cp1252 encoding are read correctly."""
+        test_file = tmp_path / "cp1252.txt"
+        # Write content with cp1252 encoding (non-breaking space 0xa0)
+        content = "Hello\xa0World\nSecond line\n"
+        test_file.write_bytes(content.encode("cp1252"))
+
+        lines = read_lines(test_file)
+        assert lines == ["Hello\xa0World", "Second line"]
+
+    @pytest.mark.unit
+    def test_encoding_fallback_latin1(self, tmp_path: Path) -> None:
+        """Test that files with latin-1 encoding are read correctly."""
+        test_file = tmp_path / "latin1.txt"
+        # Write content with latin-1 encoding
+        content = "Café\n naïve\n"
+        test_file.write_bytes(content.encode("latin-1"))
+
+        lines = read_lines(test_file)
+        assert lines == ["Café", " naïve"]
+
 
 class TestDiffFiles:
     """Tests for the diff_files function."""

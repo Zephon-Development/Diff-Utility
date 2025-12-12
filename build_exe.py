@@ -15,8 +15,6 @@ def build_exe() -> None:
 
     # Run PyInstaller
     cmd = [
-        sys.executable,
-        "-m",
         "pyinstaller",
         "--onefile",  # Single executable file
         "--name",

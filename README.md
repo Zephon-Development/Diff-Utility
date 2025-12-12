@@ -253,6 +253,19 @@ The GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every push and 
 **Runner Requirements:**  
 The workflow uses the **Grimslade** self-hosted runner (organization-level). This runner is maintained centrally and automatically available to all repositories in the organization. External users reusing this template outside the organization must replace `runs-on: [self-hosted, Grimslade]` with a GitHub-hosted runner (e.g., `ubuntu-latest`).
 
+### Release PAT
+
+To allow CI to push tags and create releases which trigger other workflows (recommended), add a Personal Access Token (PAT) as a secret named `PUBLIC_RELEASE_PAT` in the repository.
+
+Steps to create and add a PAT:
+- Create a Fine-Grained Personal Access Token via GitHub settings:
+	- Repository access: choose `Zephon-Development/Diff-Utility`.
+	- Permissions: `Contents: Read & write` and optionally `Workflows: Read & write` (if you want to dispatch workflows).
+	- Set an expiration date per security policy and copy the token.
+- Add the token as a secret in the repository: `Settings -> Secrets and variables -> Actions -> New repository secret` (Name: `PUBLIC_RELEASE_PAT`, Value: the PAT string).
+
+CI validates the presence of `PUBLIC_RELEASE_PAT` and will fail if absent when attempting to push tags/releases.
+
 ---
 
 ## Standards Compliance

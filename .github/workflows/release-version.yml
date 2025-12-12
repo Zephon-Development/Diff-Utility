@@ -8,6 +8,10 @@ on:
 jobs:
   build-and-release:
     runs-on: [self-hosted, KHAZAD-DUM]  # Windows host for .exe
+    permissions:
+      contents: write
+      packages: write
+      actions: read
 
     steps:
     - name: Allow PowerShell scripts
@@ -42,9 +46,25 @@ jobs:
     - name: Build executable
       run: python build_exe.py
 
+    - name: Verify executable
+      run: |
+        if [ ! -f dist/diff-utility.exe ]; then
+          echo "Executable not found at dist/diff-utility.exe"
+          exit 1
+        fi
+        echo "Executable verified: dist/diff-utility.exe"
+
+    - name: Validate PUBLIC_RELEASE_PAT secret
+      run: |
+        if [ -z "${{ secrets.PUBLIC_RELEASE_PAT }}" ]; then
+          echo "PUBLIC_RELEASE_PAT secret not set. Please add it to repository secrets as PUBLIC_RELEASE_PAT"
+          exit 1
+        fi
+
     - name: Create version release
       uses: softprops/action-gh-release@v1
       with:
+        token: ${{ secrets.PUBLIC_RELEASE_PAT }}
         tag_name: v${{ steps.version.outputs.version }}
         name: Version ${{ steps.version.outputs.version }}
         body_path: RELEASE_NOTES.md

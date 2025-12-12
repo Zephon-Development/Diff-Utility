@@ -32,7 +32,7 @@ def build_exe() -> None:
     cmd = [
         sys.executable,
         "-m",
-        "pyinstaller",
+        "PyInstaller",
         "--onefile",  # Single executable file
         "--name",
         "diff-utility",

@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import importlib
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -14,9 +16,6 @@ def build_exe() -> None:
     project_root = Path(__file__).parent
 
     # Print diagnostics to help debugging CI issues
-    import os
-    import importlib
-
     print("Python executable:", sys.executable)
     print("Python version:", sys.version)
     print("PATH:", os.environ.get("PATH"))

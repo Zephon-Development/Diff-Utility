@@ -1,5 +1,17 @@
 # Release Notes
 
+## Version 1.3.0
+- **Release Workflow Revamp**: Redesigned release processes for better maintainability
+  - `latest-release` automatically updated on every merge to main
+  - Versioned releases created via tags (v*) also update `latest-release`
+  - All workflows use PowerShell commands for Windows runner compatibility
+  - PAT validation only occurs during release steps, not during PR CI
+- **CLI Version Support**: Added `-v/--version` flag to display version
+  - Help text now includes version number in description
+  - Follows standard CLI conventions for version reporting
+- **Improved Workflow Reliability**: Fixed shell compatibility issues across workflows
+- **Documentation**: Updated README and CODING_STANDARDS with new release process
+
 ## Version 1.2.3
 - Fixed shell syntax in release-version.yml workflow for Windows compatibility
 - Changed version reading from bash to PowerShell commands

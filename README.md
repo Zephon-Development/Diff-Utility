@@ -1,6 +1,6 @@
 # Diff Utility
 
-**Version:** 1.2.3
+**Version:** 1.3.0
 **Python:** 3.11+  
 **License:** GPL-3.0-or-later
 
@@ -57,6 +57,19 @@ Compare two text files:
 ```powershell
 # Basic usage
 diff-utility file1.txt file2.txt
+
+# Using named arguments
+diff-utility -file1 file1.txt -file2 file2.txt
+
+# Save output to file
+diff-utility file1.txt file2.txt -output result.txt
+
+# Display version
+diff-utility --version
+diff-utility -v
+
+# Display help
+diff-utility --help
 
 # Or using Python module
 python -m diff_utility.cli file1.txt file2.txt
@@ -252,6 +265,25 @@ The GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every push and 
 
 **Runner Requirements:**  
 The workflow uses the **Grimslade** self-hosted runner (organization-level). This runner is maintained centrally and automatically available to all repositories in the organization. External users reusing this template outside the organization must replace `runs-on: [self-hosted, Grimslade]` with a GitHub-hosted runner (e.g., `ubuntu-latest`).
+
+### Release Process
+
+The project maintains two types of releases:
+
+1. **Latest Release (`latest-release`)**: Automatically updated on every merge to `main`
+   - Contains the most recent stable executable
+   - Always reflects the current state of the main branch
+
+2. **Versioned Releases (`vX.Y.Z`)**: Created when version tags are pushed
+   - Permanent releases for feature milestones
+   - Also updates `latest-release` to maintain currency
+   - Triggered by pushing tags like `v1.3.0`
+
+**Release Workflows:**
+- `release-latest.yml`: Builds and publishes to `latest-release` on main branch updates
+- `release-version.yml`: Builds and publishes versioned releases on tag push, also updates `latest-release`
+
+Both workflows require the `PUBLIC_RELEASE_PAT` secret for authentication.
 
 ### Release PAT
 

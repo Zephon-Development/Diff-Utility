@@ -16,7 +16,7 @@ from diff_utility.diff import (
     read_lines,
 )
 
-__version__ = "1.2.3"
+__version__ = "1.3.0"
 
 __all__ = [
     "__version__",

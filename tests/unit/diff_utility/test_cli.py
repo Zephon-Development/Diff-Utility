@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 import pytest
 
+from diff_utility import __version__
 from diff_utility.cli import main
 
 
@@ -398,3 +399,44 @@ class TestCLI:
         captured = capsys.readouterr()
         assert exit_code == 1
         assert "Error: OSError" in captured.err
+
+    @pytest.mark.unit
+    def test_version_flag_short(self, capsys: pytest.CaptureFixture[str]) -> None:
+        """Test -v flag displays version and exits."""
+        with (
+            patch.object(sys, "argv", ["diff-utility", "-v"]),
+            pytest.raises(SystemExit) as exc_info,
+        ):
+            main()
+
+        assert exc_info.value.code == 0
+        captured = capsys.readouterr()
+        assert __version__ in captured.out
+        assert "diff-utility" in captured.out
+
+    @pytest.mark.unit
+    def test_version_flag_long(self, capsys: pytest.CaptureFixture[str]) -> None:
+        """Test --version flag displays version and exits."""
+        with (
+            patch.object(sys, "argv", ["diff-utility", "--version"]),
+            pytest.raises(SystemExit) as exc_info,
+        ):
+            main()
+
+        assert exc_info.value.code == 0
+        captured = capsys.readouterr()
+        assert __version__ in captured.out
+        assert "diff-utility" in captured.out
+
+    @pytest.mark.unit
+    def test_help_includes_version(self, capsys: pytest.CaptureFixture[str]) -> None:
+        """Test that help output includes version number."""
+        with (
+            patch.object(sys, "argv", ["diff-utility", "--help"]),
+            pytest.raises(SystemExit) as exc_info,
+        ):
+            main()
+
+        assert exc_info.value.code == 0
+        captured = capsys.readouterr()
+        assert __version__ in captured.out

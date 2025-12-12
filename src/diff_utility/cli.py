@@ -6,6 +6,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from diff_utility import __version__
 from diff_utility.diff import diff_files
 
 
@@ -22,7 +23,15 @@ def main() -> int:  # noqa: PLR0911
 
     parser = argparse.ArgumentParser(
         prog="diff-utility",
-        description="Compare two text files with custom whitespace handling",
+        description=f"Compare two text files with custom whitespace handling (v{__version__})",
+    )
+
+    # Version argument
+    parser.add_argument(
+        "-v",
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
     )
 
     # Positional arguments (optional when named arguments are used)

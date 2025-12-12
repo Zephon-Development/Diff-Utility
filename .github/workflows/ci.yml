@@ -95,6 +95,17 @@ jobs:
       - name: Enforce branch coverage
         run: '$VENV_PATH/python scripts/check_branch_coverage.py --threshold 75'
 
+      - name: Tag release if version changed
+        if: success() && github.ref == 'refs/heads/main'
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          if git diff HEAD~1 --name-only | grep -q "VERSION.txt"; then
+            VERSION=$(cat VERSION.txt)
+            git tag "v$VERSION"
+            git push origin "v$VERSION"
+          fi
+
       - name: Upload coverage HTML
         if: always()
         uses: actions/upload-artifact@v4

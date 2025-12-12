@@ -17,17 +17,17 @@ def build_exe() -> None:
     import os
     import importlib
 
-    print('Python executable:', sys.executable)
-    print('Python version:', sys.version)
-    print('PATH:', os.environ.get('PATH'))
+    print("Python executable:", sys.executable)
+    print("Python version:", sys.version)
+    print("PATH:", os.environ.get("PATH"))
 
     # Ensure pyinstaller is installed for this python interpreter
     try:
-        importlib.import_module('PyInstaller')
-        print('PyInstaller already importable')
+        importlib.import_module("PyInstaller")
+        print("PyInstaller already importable")
     except Exception:
-        print('PyInstaller not available, installing...')
-        subprocess.run([sys.executable, '-m', 'pip', 'install', 'pyinstaller'], check=True)
+        print("PyInstaller not available, installing...")
+        subprocess.run([sys.executable, "-m", "pip", "install", "pyinstaller"], check=True)
 
     # Run PyInstaller
     cmd = [

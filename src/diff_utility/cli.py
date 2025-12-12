@@ -71,9 +71,9 @@ def main() -> int:  # noqa: PLR0911
     args = parser.parse_args(argv[1:])
 
     # Named arguments override positional ones
-    final_file1 = args.named_file1 or args.file1
-    final_file2 = args.named_file2 or args.file2
-    final_output = args.named_output or args.output
+    final_file1 = args.named_file1 if args.named_file1 is not None else args.file1
+    final_file2 = args.named_file2 if args.named_file2 is not None else args.file2
+    final_output = args.named_output if args.named_output is not None else args.output
 
     # Validate required arguments
     if final_file1 is None:

@@ -348,3 +348,53 @@ class TestCLI:
         captured = capsys.readouterr()
         assert exit_code == 2
         assert "Error: Second file argument is required" in captured.err
+
+    @pytest.mark.unit
+    def test_output_file_permission_error(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test that permission errors when writing output file are handled gracefully."""
+        file1 = tmp_path / "file1.txt"
+        file2 = tmp_path / "file2.txt"
+        output = tmp_path / "output.txt"
+
+        file1.write_text("Hello World\n", encoding="utf-8")
+        file2.write_text("Hello Universe\n", encoding="utf-8")
+
+        def mock_write_text_permission_error(self: Path, *args: object, **kwargs: object) -> None:
+            msg = "Permission denied"
+            raise PermissionError(msg)
+
+        monkeypatch.setattr(Path, "write_text", mock_write_text_permission_error)
+
+        with patch.object(sys, "argv", ["diff-utility", str(file1), str(file2), "-o", str(output)]):
+            exit_code = main()
+
+        captured = capsys.readouterr()
+        assert exit_code == 1
+        assert "Error: PermissionError" in captured.err
+
+    @pytest.mark.unit
+    def test_output_file_io_error(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test that I/O errors when writing output file are handled gracefully."""
+        file1 = tmp_path / "file1.txt"
+        file2 = tmp_path / "file2.txt"
+        output = tmp_path / "output.txt"
+
+        file1.write_text("Hello World\n", encoding="utf-8")
+        file2.write_text("Hello Universe\n", encoding="utf-8")
+
+        def mock_write_text_io_error(self: Path, *args: object, **kwargs: object) -> None:
+            msg = "Disk full"
+            raise OSError(msg)
+
+        monkeypatch.setattr(Path, "write_text", mock_write_text_io_error)
+
+        with patch.object(sys, "argv", ["diff-utility", str(file1), str(file2), "-o", str(output)]):
+            exit_code = main()
+
+        captured = capsys.readouterr()
+        assert exit_code == 1
+        assert "Error: OSError" in captured.err

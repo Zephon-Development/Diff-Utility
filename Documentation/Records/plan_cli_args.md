@@ -19,7 +19,7 @@
 ## Constraints and Requirements
 - **Backward Compatibility**: Existing positional arguments (file1 file2) must continue to work.
 - **Override Logic**: Named switches take precedence over positional arguments.
-- **Help Handling**: `/ ?` and `--?` must trigger help display, similar to `--help`.
+- **Help Handling**: `/?` and `--?` must trigger help display, similar to `--help`.
 - **Output Handling**: If `-output` or `-o` is specified, write diff to file; otherwise, print to stdout.
 - **Error Handling**: Maintain existing error codes and messages.
 - **Coding Standards**: Follow CODING_STANDARDS.md for code quality, type safety, testing, and documentation.

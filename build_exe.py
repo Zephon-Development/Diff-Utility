@@ -40,8 +40,29 @@ def build_exe() -> None:
         "src/diff_utility/cli.py",
     ]
 
-    print("Building executable...")
+    print("Building executable with sys.executable -m PyInstaller...")
     result = subprocess.run(cmd, cwd=project_root, capture_output=True, text=True, check=False)
+
+    # If `python -m PyInstaller` fails, try calling the `pyinstaller` script from PATH
+    if result.returncode != 0:
+        print("First build attempt failed, trying 'pyinstaller' script from PATH...")
+        fallback_cmd = [
+            "pyinstaller",
+            "--onefile",
+            "--name",
+            "diff-utility",
+            "--console",
+            "src/diff_utility/cli.py",
+        ]
+        fallback = subprocess.run(
+            fallback_cmd, cwd=project_root, capture_output=True, text=True, check=False
+        )
+        if fallback.returncode == 0:
+            print("Build successful via fallback 'pyinstaller' call")
+            print("Executable created at: dist/diff-utility.exe")
+            return
+        print("Fallback build also failed:")
+        print(fallback.stderr)
 
     if result.returncode != 0:
         print("Build failed:")

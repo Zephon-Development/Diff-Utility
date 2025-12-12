@@ -104,7 +104,7 @@ Coverage: 96.21% (155 statements, 5 missed, 56 branches, 3 partial)
 
 ## Outstanding Items
 
-### None - Implementation Complete
+### None - Implementation Complete & Revised
 All tasks from handoff completed:
 1. ✓ CI workflow ensures lint-type-test on PRs
 2. ✓ Workflows rewritten with PowerShell
@@ -113,6 +113,19 @@ All tasks from handoff completed:
 5. ✓ Documentation updated
 6. ✓ Version bumped to 1.3.0
 7. ✓ All quality gates passed
+8. ✓ **Blocker resolved:** Removed duplicate keys from release-version.yml
+
+## Revision History
+
+### 2025-12-12 - Post-Review Fix
+**Blocker Addressed:** Clive identified duplicate YAML keys in [.github/workflows/release-version.yml](.github/workflows/release-version.yml#L90-L96)
+- **Issue:** The "Update latest-release" step had duplicate `fail_on_unmatched_files` and `generate_release_notes` entries (lines 93-96)
+- **Impact:** YAML parser keeps last value, so `generate_release_notes: true` would override intended `false`, causing unwanted auto-generated notes
+- **Fix Applied:** Removed duplicate lines 95-96, keeping single occurrence of each setting with correct values:
+  - `fail_on_unmatched_files: true` (once)
+  - `generate_release_notes: false` (once)
+- **Verification:** All quality gates re-run and passing (Black, Ruff, mypy, pytest 96.21% coverage, branch coverage 94.64%)
+- **Commit:** `b385f12` - "fix: Remove duplicate keys in release-version.yml workflow"
 
 ## Notes for Clive
 
@@ -124,6 +137,12 @@ All tasks from handoff completed:
 ### Future Enhancements (Out of Scope)
 - **Release pruning:** Plan mentioned deleting old bugfix releases per minor. This was intentionally deferred as it adds complexity and isn't critical for initial deployment. Recommend addressing in separate PR if needed.
 - **Explicit shell directive:** All `run` steps could add `shell: pwsh` for clarity, though Windows runners default to PowerShell.
+
+### Revision Addressing Clive's Blocker
+**Fixed:** [.github/workflows/release-version.yml](.github/workflows/release-version.yml) duplicate keys removed
+- Workflow now has clean, unambiguous metadata settings for latest-release update
+- `generate_release_notes: false` correctly prevents auto-generated notes pollution
+- All quality gates re-verified post-fix (Black, Ruff, mypy, pytest 96.21%, branch coverage 94.64%)
 
 ### Testing Notes
 - Version flag tests use `pytest.raises(SystemExit)` as `--version` triggers `sys.exit(0)`

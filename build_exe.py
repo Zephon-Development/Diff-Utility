@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import importlib
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -12,6 +14,19 @@ def build_exe() -> None:
     """Build the executable using PyInstaller."""
     # Ensure we're in the project root
     project_root = Path(__file__).parent
+
+    # Print diagnostics to help debugging CI issues
+    print("Python executable:", sys.executable)
+    print("Python version:", sys.version)
+    print("PATH:", os.environ.get("PATH"))
+
+    # Ensure pyinstaller is installed for this python interpreter
+    try:
+        importlib.import_module("PyInstaller")
+        print("PyInstaller already importable")
+    except Exception:
+        print("PyInstaller not available, installing...")
+        subprocess.run([sys.executable, "-m", "pip", "install", "pyinstaller"], check=True)
 
     # Run PyInstaller
     cmd = [

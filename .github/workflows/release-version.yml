@@ -1,12 +1,9 @@
 name: Release Version
 
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version number (e.g., 1.0.0)'
-        required: true
-        type: string
+  push:
+    tags:
+      - 'v*'
 
 jobs:
   build-and-release:
@@ -19,6 +16,10 @@ jobs:
 
     - name: Checkout code
       uses: actions/checkout@v4
+
+    - name: Read version
+      id: version
+      run: echo "version=$(cat VERSION.txt)" >> $GITHUB_OUTPUT
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -38,21 +39,15 @@ jobs:
         python -m pytest --cov=src --cov-branch --cov-fail-under=80 -q
         python scripts/check_branch_coverage.py --threshold 75
 
-    - name: Update version
-      run: echo "${{ inputs.version }}" > VERSION.txt
-
     - name: Build executable
       run: python build_exe.py
 
     - name: Create version release
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: version-${{ inputs.version }}
-        name: Version ${{ inputs.version }}
-        body: |
-          Release for Diff-Utility v${{ inputs.version }}
-
-          This is a tagged version release containing the executable.
+        tag_name: v${{ steps.version.outputs.version }}
+        name: Version ${{ steps.version.outputs.version }}
+        body_path: RELEASE_NOTES.md
         draft: false
         prerelease: false
         files: ./dist/diff-utility.exe

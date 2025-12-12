@@ -24,7 +24,9 @@ jobs:
 
     - name: Read version
       id: version
-      run: echo "version=$(cat VERSION.txt)" >> $GITHUB_OUTPUT
+      run: |
+        VERSION=$(cat VERSION.txt)
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
 
     - name: Set up Python
       uses: actions/setup-python@v4

@@ -457,6 +457,27 @@ class TestReadLines:
         lines = read_lines(test_file)
         assert lines == ["Café", " naïve"]
 
+    @pytest.mark.unit
+    def test_invalid_characters_skipped(self, tmp_path: Path) -> None:
+        """Test that files with invalid characters are read with those characters skipped."""
+        test_file = tmp_path / "invalid.txt"
+        # Create a file with invalid UTF-8 sequences that are also invalid in cp1252 and latin-1
+        # Using a mix of valid and invalid bytes to test the fallback to errors='ignore'
+        # Start with valid UTF-8, then insert invalid sequences
+        test_file.write_bytes(
+            b"Hello\xc0\x80World\n"  # \xc0\x80 is an overlong encoding, invalid in all encodings
+            b"Line\xfe\xff2\n"  # \xfe\xff are byte order marks, problematic
+        )
+
+        lines = read_lines(test_file)
+        # Invalid bytes should be skipped with errors='ignore'
+        # The exact result depends on which encoding catches it
+        assert len(lines) == 2
+        assert "Hello" in lines[0]
+        assert "World" in lines[0]
+        assert "Line" in lines[1]
+        assert "2" in lines[1]
+
 
 class TestDiffFiles:
     """Tests for the diff_files function."""

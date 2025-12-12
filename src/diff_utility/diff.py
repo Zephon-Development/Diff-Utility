@@ -14,7 +14,8 @@ from pathlib import Path
 def read_lines(path: Path) -> list[str]:
     """
     Attempts to read the file with UTF-8 encoding first. If that fails due to
-    encoding errors, falls back to Windows-1252 encoding commonly used on Windows.
+    encoding errors, falls back to Windows-1252 encoding commonly used on Windows,
+    then latin-1. If all encodings fail, reads with UTF-8 and skips invalid characters.
 
     Args:
         path: Path to the file to read.
@@ -25,19 +26,21 @@ def read_lines(path: Path) -> list[str]:
     Raises:
         FileNotFoundError: If the file does not exist.
         PermissionError: If the file cannot be read.
-        ValueError: If the file cannot be decoded with supported encodings.
         OSError: For other I/O errors.
     """
     encodings = ["utf-8", "cp1252", "latin-1"]
+
     for encoding in encodings:
         try:
             with path.open("r", encoding=encoding) as f:
                 return [line.rstrip("\n") for line in f]
         except UnicodeDecodeError:
             continue
-    # If all encodings fail, raise the last error
-    error_msg = f"Could not decode file {path} with any supported encoding"
-    raise ValueError(error_msg)
+
+    # If all encodings fail, fall back to utf-8 with errors='ignore'
+    # This skips invalid characters rather than crashing
+    with path.open("r", encoding="utf-8", errors="ignore") as f:
+        return [line.rstrip("\n") for line in f]
 
 
 def normalize_line(line: str) -> str:

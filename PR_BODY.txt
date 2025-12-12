@@ -1,0 +1,7 @@
+- Ensure Python interpreter used consistently via python -m pip
+- Install pyinstaller explicitly and add a check so builds won't fail with "No module named pyinstaller"
+- Add debug steps to print python executable and confirm pyinstaller presence
+- Add workflow_dispatch so the release workflow can be manually triggered while debugging
+- Unify pip install usage to python -m pip to avoid interpreter confusion
+
+This PR aims to fix release jobs failing to build on the Windows runner and make releases easier to debug and trigger. Please review and merge to main.

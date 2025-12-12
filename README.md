@@ -1,6 +1,6 @@
 # Diff Utility
 
-**Version:** 1.2.1
+**Version:** 1.2.2
 **Python:** 3.11+  
 **License:** GPL-3.0-or-later
 

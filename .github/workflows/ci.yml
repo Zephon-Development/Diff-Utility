@@ -100,16 +100,12 @@ jobs:
       - name: Validate PUBLIC_RELEASE_PAT secret
         if: success() && github.ref == 'refs/heads/main'
         env:
-          PUBLIC_RELEASE_PAT: ${{ secrets.PUBLIC_RELEASE_PAT }}
+          PAT_VALUE: ${{ secrets.PUBLIC_RELEASE_PAT }}
         run: |
-          python - <<'PY'
-          import os
-          import sys
-          if not os.environ.get('PUBLIC_RELEASE_PAT'):
-              print('PUBLIC_RELEASE_PAT secret not set. Please add it to repository secrets as PUBLIC_RELEASE_PAT')
-              sys.exit(1)
-          print('PUBLIC_RELEASE_PAT is present')
-          PY
+          if [ -z "$PAT_VALUE" ]; then
+            echo "PUBLIC_RELEASE_PAT secret not set. Please add it to repository secrets as PUBLIC_RELEASE_PAT"
+            exit 1
+          fi
 
       - name: Tag release if version changed (using PAT)
         if: success() && github.ref == 'refs/heads/main'

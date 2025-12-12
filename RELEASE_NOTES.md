@@ -1,5 +1,10 @@
 # Release Notes
 
+## Version 1.2.3
+- Fixed shell syntax in release-version.yml workflow for Windows compatibility
+- Changed version reading from bash to PowerShell commands
+- Ensures proper tag name generation for releases
+
 ## Version 1.2.2
 - Removed unnecessary PAT validation step from release-version.yml to avoid shell compatibility issues
 - Workflow will fail naturally if PAT is missing, eliminating redundant checks

@@ -24,7 +24,9 @@ jobs:
 
     - name: Read version
       id: version
-      run: echo "version=$(cat VERSION.txt)" >> $GITHUB_OUTPUT
+      run: |
+        $VERSION = Get-Content VERSION.txt
+        "version=$VERSION" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
     - name: Set up Python
       uses: actions/setup-python@v4

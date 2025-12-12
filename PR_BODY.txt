@@ -1,0 +1,38 @@
+## Summary
+
+Implements flexible CLI argument handling with named options alongside existing positional arguments, and bumps version to 1.2.0 per approved plan.
+
+## Changes
+
+**CLI Enhancements** (`src/diff_utility/cli.py`):
+- Help options: `/?` and `--?` now work alongside `--help`
+- Named file inputs: `-file1`/`-1` for first file, `-file2`/`-2` for second file
+- Output to file: `-output`/`-o` writes results to specified file instead of stdout
+- Named arguments override positional when both provided (using explicit `is not None` checks)
+- Backward compatible: all existing positional usage continues to work
+- Enhanced error handling for output file write operations
+
+**Example Usage**:
+```bash
+# Traditional positional still works
+diff-utility file1.txt file2.txt
+
+# New named arguments
+diff-utility -1 file1.txt -2 file2.txt -o output.txt
+
+# Override: compares file1 with file3 (not file2)
+diff-utility file1.txt file2.txt -file2 file3.txt
+```
+
+**Version Management**:
+- Bumped to 1.2.0 in `pyproject.toml`, `VERSION.txt`, `README.md`, `RELEASE_NOTES.md`
+- Added version bump checklist to `CODING_STANDARDS.md` §5.5 specifying the 4 files that must be updated
+
+**Tests** (`tests/unit/diff_utility/test_cli.py`):
+- Added 14 comprehensive tests covering help variants, named arguments, override behavior, file output, and error handling
+- All 84 tests passing with 96.17% coverage (94.64% branch coverage)
+
+**Documentation**:
+- Moved planning documents to `Documentation/Records/` per CODING_STANDARDS.md §5.4
+
+Please review and merge to main.

@@ -68,10 +68,13 @@ jobs:
         Write-Host "Executable verified: dist/diff-utility.exe"
 
     - name: Validate PUBLIC_RELEASE_PAT secret
-      if: ${{ secrets.PUBLIC_RELEASE_PAT == '' || secrets.PUBLIC_RELEASE_PAT == null }}
+      env:
+        PUBLIC_RELEASE_PAT: ${{ secrets.PUBLIC_RELEASE_PAT }}
       run: |
-        echo "PUBLIC_RELEASE_PAT secret not set. Please add it to repository secrets as PUBLIC_RELEASE_PAT"
-        exit 1
+        if [ -z "$PUBLIC_RELEASE_PAT" ]; then
+          echo "PUBLIC_RELEASE_PAT secret not set. Please add it to repository secrets as PUBLIC_RELEASE_PAT"
+          exit 1
+        fi
 
     - name: Create version release
       uses: softprops/action-gh-release@v1

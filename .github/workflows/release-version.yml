@@ -42,6 +42,14 @@ jobs:
     - name: Build executable
       run: python build_exe.py
 
+    - name: Verify executable
+      run: |
+        if [ ! -f dist/diff-utility.exe ]; then
+          echo "Executable not found at dist/diff-utility.exe"
+          exit 1
+        fi
+        echo "Executable verified: dist/diff-utility.exe"
+
     - name: Create version release
       uses: softprops/action-gh-release@v1
       with:

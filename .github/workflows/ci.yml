@@ -100,8 +100,8 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          if git diff HEAD~1 --name-only | grep -q "VERSION.txt"; then
-            VERSION=$(cat VERSION.txt)
+          VERSION=$(cat VERSION.txt)
+          if ! git tag -l | grep -q "v$VERSION"; then
             git tag "v$VERSION"
             git push origin "v$VERSION"
           fi

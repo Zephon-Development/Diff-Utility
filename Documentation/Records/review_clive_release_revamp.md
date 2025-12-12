@@ -30,3 +30,10 @@
 - After adjusting, re-run the standard lint/type/test suite to keep coverage data in sync and update this branch.
 
 Once the workflow file is corrected, I can re-review quickly to green-light the merge.
+
+## Re-Review (2025-12-12 PM)
+- **Scope recap:** Confirmed PowerShell-only release workflows, dual latest/version release behavior, CLI version flag UX/tests, and adherence to CODING_STANDARDS (strict typing, linting, ≥80% coverage w/ ≥75% branch coverage).
+- **Diff spot-check:** `.github/workflows/release-version.yml` now has single `fail_on_unmatched_files` + `generate_release_notes: false` entry for the latest-release step; no other regressions observed.
+- **Tests observed:** `black .`, `ruff check .`, `mypy --strict .`, `pytest --cov=src --cov-branch --cov-fail-under=80 -q`, `python scripts/check_branch_coverage.py --threshold 75` → all passed, overall coverage 96.21%, branch coverage 94.64%.
+- **Finding status:** Previous blocker resolved; no new issues detected.
+- **Next steps:** Green-light to merge `feature/release-revamp` once CI completes.

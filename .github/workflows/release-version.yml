@@ -68,17 +68,10 @@ jobs:
         Write-Host "Executable verified: dist/diff-utility.exe"
 
     - name: Validate PUBLIC_RELEASE_PAT secret
-      env:
-        PUBLIC_RELEASE_PAT: ${{ secrets.PUBLIC_RELEASE_PAT }}
+      if: ${{ secrets.PUBLIC_RELEASE_PAT == '' || secrets.PUBLIC_RELEASE_PAT == null }}
       run: |
-        python - <<'PY'
-        import os
-        import sys
-        if not os.environ.get('PUBLIC_RELEASE_PAT'):
-            print('PUBLIC_RELEASE_PAT secret not set. Please add it to repository secrets as PUBLIC_RELEASE_PAT')
-            sys.exit(1)
-        print('PUBLIC_RELEASE_PAT is present')
-        PY
+        echo "PUBLIC_RELEASE_PAT secret not set. Please add it to repository secrets as PUBLIC_RELEASE_PAT"
+        exit 1
 
     - name: Create version release
       uses: softprops/action-gh-release@v1

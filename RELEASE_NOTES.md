@@ -1,5 +1,9 @@
 # Release Notes
 
+## Version 1.2.2
+- Removed unnecessary PAT validation step from release-version.yml to avoid shell compatibility issues
+- Workflow will fail naturally if PAT is missing, eliminating redundant checks
+
 ## Version 1.2.1
 - Fixed workflow syntax errors in release-version.yml for proper CI/CD operation
 - Improved secret validation logic in GitHub Actions workflows

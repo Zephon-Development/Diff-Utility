@@ -92,5 +92,3 @@ jobs:
         files: ./dist/diff-utility.exe
         fail_on_unmatched_files: true
         generate_release_notes: false
-        fail_on_unmatched_files: true
-        generate_release_notes: true

@@ -98,10 +98,14 @@ jobs:
         run: '$VENV_PATH/python scripts/check_branch_coverage.py --threshold 75'
 
       - name: Validate PUBLIC_RELEASE_PAT secret
-        if: success() && github.ref == 'refs/heads/main' && (secrets.PUBLIC_RELEASE_PAT == '' || secrets.PUBLIC_RELEASE_PAT == null)
+        if: success() && github.ref == 'refs/heads/main'
+        env:
+          PAT_VALUE: ${{ secrets.PUBLIC_RELEASE_PAT }}
         run: |
-          echo "PUBLIC_RELEASE_PAT secret not set. Please add it to repository secrets as PUBLIC_RELEASE_PAT"
-          exit 1
+          if [ -z "$PAT_VALUE" ]; then
+            echo "PUBLIC_RELEASE_PAT secret not set. Please add it to repository secrets as PUBLIC_RELEASE_PAT"
+            exit 1
+          fi
 
       - name: Tag release if version changed (using PAT)
         if: success() && github.ref == 'refs/heads/main'

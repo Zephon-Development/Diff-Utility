@@ -1,5 +1,9 @@
 # Release Notes
 
+## Version 1.2.1
+- Fixed workflow syntax errors in release-version.yml for proper CI/CD operation
+- Improved secret validation logic in GitHub Actions workflows
+
 ## Version 1.2.0
 - **CLI Argument Enhancements**: Added comprehensive command-line argument support
   - New help options: `--help`, `/?`, and `--?` all display help information

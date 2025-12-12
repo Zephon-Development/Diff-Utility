@@ -148,10 +148,12 @@ class TestCLI:
     @pytest.mark.unit
     def test_help_with_double_dash(self, capsys: pytest.CaptureFixture[str]) -> None:
         """Test that --help displays help."""
-        with pytest.raises(SystemExit) as exc_info:
-            with patch.object(sys, "argv", ["diff-utility", "--help"]):
-                main()
-        
+        with (
+            pytest.raises(SystemExit) as exc_info,
+            patch.object(sys, "argv", ["diff-utility", "--help"]),
+        ):
+            main()
+
         assert exc_info.value.code == 0
         captured = capsys.readouterr()
         assert "Compare two text files" in captured.out
@@ -159,10 +161,12 @@ class TestCLI:
     @pytest.mark.unit
     def test_help_with_slash_question(self, capsys: pytest.CaptureFixture[str]) -> None:
         """Test that /? displays help."""
-        with pytest.raises(SystemExit) as exc_info:
-            with patch.object(sys, "argv", ["diff-utility", "/?"]):
-                main()
-        
+        with (
+            pytest.raises(SystemExit) as exc_info,
+            patch.object(sys, "argv", ["diff-utility", "/?"]),
+        ):
+            main()
+
         assert exc_info.value.code == 0
         captured = capsys.readouterr()
         assert "Compare two text files" in captured.out
@@ -170,18 +174,18 @@ class TestCLI:
     @pytest.mark.unit
     def test_help_with_dash_question(self, capsys: pytest.CaptureFixture[str]) -> None:
         """Test that --? displays help."""
-        with pytest.raises(SystemExit) as exc_info:
-            with patch.object(sys, "argv", ["diff-utility", "--?"]):
-                main()
-        
+        with (
+            pytest.raises(SystemExit) as exc_info,
+            patch.object(sys, "argv", ["diff-utility", "--?"]),
+        ):
+            main()
+
         assert exc_info.value.code == 0
         captured = capsys.readouterr()
         assert "Compare two text files" in captured.out
 
     @pytest.mark.unit
-    def test_named_file1_argument(
-        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
-    ) -> None:
+    def test_named_file1_argument(self, tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
         """Test using -file1 named argument."""
         file1 = tmp_path / "file1.txt"
         file2 = tmp_path / "file2.txt"
@@ -189,7 +193,9 @@ class TestCLI:
         file1.write_text("Hello World\n", encoding="utf-8")
         file2.write_text("Hello Universe\n", encoding="utf-8")
 
-        with patch.object(sys, "argv", ["diff-utility", "-file1", str(file1), "-file2", str(file2)]):
+        with patch.object(
+            sys, "argv", ["diff-utility", "-file1", str(file1), "-file2", str(file2)]
+        ):
             exit_code = main()
 
         captured = capsys.readouterr()
@@ -228,7 +234,9 @@ class TestCLI:
         file3.write_text("File 3\n", encoding="utf-8")
 
         # Positional says file1 and file2, but -file2 overrides with file3
-        with patch.object(sys, "argv", ["diff-utility", str(file1), str(file2), "-file2", str(file3)]):
+        with patch.object(
+            sys, "argv", ["diff-utility", str(file1), str(file2), "-file2", str(file3)]
+        ):
             exit_code = main()
 
         captured = capsys.readouterr()
@@ -285,7 +293,9 @@ class TestCLI:
         file1.write_text("Hello World\n", encoding="utf-8")
         file2.write_text("Hello Universe\n", encoding="utf-8")
 
-        with patch.object(sys, "argv", ["diff-utility", str(file1), str(file2), "-output", str(output)]):
+        with patch.object(
+            sys, "argv", ["diff-utility", str(file1), str(file2), "-output", str(output)]
+        ):
             exit_code = main()
 
         assert exit_code == 0
@@ -305,7 +315,11 @@ class TestCLI:
         file2.write_text("Hello Universe\n", encoding="utf-8")
 
         # Positional output is output1, but -output overrides with output2
-        with patch.object(sys, "argv", ["diff-utility", str(file1), str(file2), str(output1), "-output", str(output2)]):
+        with patch.object(
+            sys,
+            "argv",
+            ["diff-utility", str(file1), str(file2), str(output1), "-output", str(output2)],
+        ):
             exit_code = main()
 
         assert exit_code == 0

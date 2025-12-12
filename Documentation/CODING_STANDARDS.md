@@ -715,6 +715,7 @@ When bumping the project version, the following files **must** be updated consis
 2. **`VERSION.txt`** – Update the version number (single line)
 3. **`README.md`** – Update the version badge/reference in the header
 4. **`RELEASE_NOTES.md`** – Add a new version section with changes
+5. **`src/diff_utility/__init__.py`** – Update the `__version__` variable
 
 **Version Format:** `[MAJOR].[MINOR].[BUGFIX]`
 - **MAJOR**: Breaking changes (resets MINOR and BUGFIX to 0)
@@ -728,7 +729,7 @@ When bumping the project version, the following files **must** be updated consis
 
 **Process:**
 1. Every PR must bump the version (even for bug fixes)
-2. Update all four files in the same commit
+2. Update all five files in the same commit
 3. Use commit message format: "Bump version to X.Y.Z"
 4. Tag the commit with `vX.Y.Z` after merge to main
 5. Update RELEASE_NOTES.md with detailed changelog before version bump

@@ -1,6 +1,7 @@
 # Release Notes
 
-## Version 1.1.2
+## Version 1.1.3
+- Bump version to 1.1.3 for end-to-end test
 - Fixed build script to correctly invoke PyInstaller for executable generation.
 - Added local CI test script for running quality checks locally.
 - Improved automated tagging logic to check for existing tags instead of file changes.
